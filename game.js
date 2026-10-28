@@ -29,6 +29,204 @@ const dist  = (a, b)   => Math.hypot(a.x - b.x, a.y - b.y);
 const rand  = (min, max) => min + Math.random() * (max - min);
 const randInt = (min, max) => Math.floor(rand(min, max + 1));
 
+// ── Skins ─────────────────────────────────────────────────────────────────────
+const SKIN_KEY = 'asteroids.skin';
+
+// Cada skin dibuja la nave en coordenadas locales: nariz en x ≈ 20 y cuerpo
+// centrado en 0. El radio de colisión (12) y el origen de disparo (21) no cambian.
+const SKINS = [
+  {
+    id: 'clasica',
+    nombre: 'CLÁSICA',
+    color: '#fff',
+    linea: 1.5,
+    llama: {
+      x: -8, ancho: 4,
+      color: 'rgba(255, 130, 0, 0.85)',
+      colorBoost: 'rgba(77, 227, 255, 0.9)',
+    },
+    dibujar(ctx) {
+      ctx.strokeStyle = this.color;
+      ctx.lineWidth   = this.linea;
+      ctx.lineJoin    = 'round';
+      ctx.beginPath();
+      ctx.moveTo( 20,  0);
+      ctx.lineTo(-12, -9);
+      ctx.lineTo( -7,  0);
+      ctx.lineTo(-12,  9);
+      ctx.closePath();
+      ctx.stroke();
+    },
+  },
+  {
+    id: 'interceptor',
+    nombre: 'INTERCEPTOR',
+    color: '#4de3ff',
+    linea: 1.5,
+    llama: {
+      x: -10, ancho: 3,
+      color: 'rgba(255, 130, 0, 0.85)',
+      colorBoost: 'rgba(77, 227, 255, 0.9)',
+    },
+    dibujar(ctx) {
+      ctx.strokeStyle = this.color;
+      ctx.lineWidth   = this.linea;
+      ctx.lineJoin    = 'round';
+      ctx.beginPath();
+      ctx.moveTo( 21,   0);
+      ctx.lineTo( -5,  -5);
+      ctx.lineTo(-13, -12);
+      ctx.lineTo(-10,   0);
+      ctx.lineTo(-13,  12);
+      ctx.lineTo( -5,   5);
+      ctx.closePath();
+      ctx.stroke();
+
+      // Línea de fuselaje
+      ctx.beginPath();
+      ctx.moveTo( 15, 0);
+      ctx.lineTo( -6, 0);
+      ctx.stroke();
+    },
+  },
+  {
+    id: 'halcon',
+    nombre: 'HALCÓN',
+    color: '#ffb347',
+    linea: 1.5,
+    llama: {
+      x: -8, ancho: 5,
+      color: 'rgba(255, 130, 0, 0.85)',
+      colorBoost: 'rgba(77, 227, 255, 0.9)',
+    },
+    dibujar(ctx) {
+      ctx.strokeStyle = this.color;
+      ctx.lineWidth   = this.linea;
+      ctx.lineJoin    = 'round';
+      ctx.beginPath();
+      ctx.moveTo( 20,   0);
+      ctx.lineTo(  2,  -6);
+      ctx.lineTo( -9, -14);
+      ctx.lineTo( -4,  -4);
+      ctx.lineTo(-11,   0);
+      ctx.lineTo( -4,   4);
+      ctx.lineTo( -9,  14);
+      ctx.lineTo(  2,   6);
+      ctx.closePath();
+      ctx.stroke();
+
+      // Cabina
+      ctx.beginPath();
+      ctx.moveTo( 10,  0);
+      ctx.lineTo(  2, -3);
+      ctx.lineTo(  2,  3);
+      ctx.closePath();
+      ctx.stroke();
+    },
+  },
+  {
+    id: 'fantasma',
+    nombre: 'FANTASMA',
+    color: '#b388ff',
+    linea: 1.5,
+    llama: {
+      x: -11, ancho: 3,
+      color: 'rgba(179, 136, 255, 0.85)',
+      colorBoost: 'rgba(224, 64, 251, 0.9)',
+    },
+    dibujar(ctx) {
+      ctx.save();
+      ctx.strokeStyle = this.color;
+      ctx.lineWidth   = this.linea;
+      ctx.lineJoin    = 'round';
+      ctx.setLineDash([4, 4]);
+      ctx.fillStyle   = 'rgba(179, 136, 255, 0.12)';
+      ctx.beginPath();
+      ctx.moveTo( 20,  0);
+      ctx.lineTo(  2, -8);
+      ctx.lineTo(-13, -8);
+      ctx.lineTo( -8,  0);
+      ctx.lineTo(-13,  8);
+      ctx.lineTo(  2,  8);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    },
+  },
+  {
+    id: 'neon',
+    nombre: 'NEÓN',
+    color: '#7dff8a',
+    linea: 1.2,
+    llama: {
+      x: -9, ancho: 3,
+      color: 'rgba(125, 255, 138, 0.85)',
+      colorBoost: 'rgba(77, 227, 255, 0.9)',
+    },
+    dibujar(ctx) {
+      ctx.save();
+      ctx.strokeStyle = this.color;
+      ctx.lineJoin    = 'round';
+
+      const trazar = () => {
+        ctx.beginPath();
+        ctx.moveTo( 21,   0);
+        ctx.lineTo( -3,  -7);
+        ctx.lineTo(-12, -10);
+        ctx.lineTo( -8,   0);
+        ctx.lineTo(-12,  10);
+        ctx.lineTo( -3,   7);
+        ctx.closePath();
+      };
+
+      // Halo exterior
+      ctx.globalAlpha = 0.4;
+      ctx.shadowColor = this.color;
+      ctx.shadowBlur  = 12;
+      ctx.lineWidth   = 3.5;
+      trazar();
+      ctx.stroke();
+
+      // Núcleo
+      ctx.globalAlpha = 1;
+      ctx.shadowBlur  = 0;
+      ctx.lineWidth   = this.linea;
+      trazar();
+      ctx.stroke();
+      ctx.restore();
+    },
+  },
+];
+
+function cargarSkin() {
+  try {
+    const i = Number.parseInt(localStorage.getItem(SKIN_KEY), 10);
+    if (Number.isInteger(i) && i >= 0 && i < SKINS.length) return i;
+  } catch (_) {
+    // localStorage no disponible (por ejemplo en file://)
+  }
+  return 0;
+}
+
+function guardarSkin() {
+  try {
+    localStorage.setItem(SKIN_KEY, String(skinIndex));
+  } catch (_) {
+    // Sin persistencia disponible: la skin solo dura la sesión
+  }
+}
+
+let skinIndex = cargarSkin();
+let skinToast = 0;   // segundos restantes del aviso de cambio de skin
+
+function cambiarSkin(i) {
+  if (i < 0 || i >= SKINS.length) return;
+  skinIndex = i;
+  skinToast = 1.6;
+  guardarSkin();
+}
+
 // ── Bullet ────────────────────────────────────────────────────────────────────
 class Bullet {
   constructor(x, y, angle) {
@@ -178,29 +376,20 @@ class Ship {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.angle);
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth   = 1.5;
-    ctx.lineJoin    = 'round';
 
-    // Silueta clásica: triángulo con muesca trasera
-    ctx.beginPath();
-    ctx.moveTo( 20,  0);   // nariz
-    ctx.lineTo(-12, -9);   // ala izquierda
-    ctx.lineTo( -7,  0);   // muesca trasera
-    ctx.lineTo(-12,  9);   // ala derecha
-    ctx.closePath();
-    ctx.stroke();
+    const skin = SKINS[skinIndex];
+    skin.dibujar(ctx);
 
     // Llama del propulsor
     if (this.thrusting && Math.random() > 0.35) {
       const boosted = this.speedBoost > 0;
+      const f = skin.llama;
       ctx.beginPath();
-      ctx.moveTo(-8, -4);
-      ctx.lineTo(-8 - (boosted ? rand(14, 26) : rand(6, 14)), 0);
-      ctx.lineTo(-8,  4);
-      ctx.strokeStyle = boosted
-        ? 'rgba(77, 227, 255, 0.9)'
-        : 'rgba(255, 130, 0, 0.85)';
+      ctx.moveTo(f.x, -f.ancho);
+      ctx.lineTo(f.x - (boosted ? rand(14, 26) : rand(6, 14)), 0);
+      ctx.lineTo(f.x,  f.ancho);
+      ctx.strokeStyle = boosted ? f.colorBoost : f.color;
+      ctx.lineWidth   = 1.5;
       ctx.stroke();
     }
 
@@ -356,6 +545,15 @@ function killShip() {
 
 // ── Update ────────────────────────────────────────────────────────────────────
 function update(dt) {
+  if (skinToast > 0) skinToast = Math.max(0, skinToast - dt);
+
+  // Cambio de skin: disponible en cualquier estado
+  for (let i = 0; i < SKINS.length; i++) {
+    const digito = pressed('Digit' + (i + 1));
+    const numpad = pressed('Numpad' + (i + 1));
+    if (digito || numpad) cambiarSkin(i);
+  }
+
   if (state === 'gameover') {
     if (pressed('Space')) initGame();
     particles.forEach(p => p.update(dt));
@@ -436,16 +634,8 @@ function drawLifeIcon(x, y) {
   ctx.save();
   ctx.translate(x, y);
   ctx.rotate(-Math.PI / 2);
-  ctx.strokeStyle = '#fff';
-  ctx.lineWidth   = 1.2;
-  ctx.lineJoin    = 'round';
-  ctx.beginPath();
-  ctx.moveTo( 9,  0);
-  ctx.lineTo(-6, -5);
-  ctx.lineTo(-3,  0);
-  ctx.lineTo(-6,  5);
-  ctx.closePath();
-  ctx.stroke();
+  ctx.scale(0.45, 0.45);
+  SKINS[skinIndex].dibujar(ctx);
   ctx.restore();
 }
 
@@ -474,6 +664,18 @@ function drawHUD() {
   }
 }
 
+function drawSkinToast() {
+  if (skinToast <= 0) return;
+  const skin = SKINS[skinIndex];
+  ctx.save();
+  ctx.globalAlpha = Math.min(1, skinToast / 0.4);   // se desvanece al final
+  ctx.textAlign   = 'center';
+  ctx.fillStyle   = skin.color;
+  ctx.font        = 'bold 15px monospace';
+  ctx.fillText(`SKIN ${skinIndex + 1}/${SKINS.length} — ${skin.nombre}`, W / 2, H - 24);
+  ctx.restore();
+}
+
 function drawOverlay(title, sub) {
   ctx.textAlign   = 'center';
   ctx.fillStyle   = '#fff';
@@ -495,6 +697,7 @@ function draw() {
   ship.draw();
 
   drawHUD();
+  drawSkinToast();
 
   if (state === 'gameover')
     drawOverlay('GAME OVER', `PUNTAJE: ${score}   —   ESPACIO PARA REINICIAR`);

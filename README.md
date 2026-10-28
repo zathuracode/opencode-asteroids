@@ -24,11 +24,12 @@ Luego visita `http://localhost:3000`.
 
 ## Controles
 
-| Tecla     | Acción     |
-| --------- | ---------- |
-| `←` `→`   | Rotar nave |
-| `↑`       | Propulsar  |
-| `Espacio` | Disparar   |
+| Tecla     | Acción               |
+| --------- | -------------------- |
+| `←` `→`   | Rotar nave           |
+| `↑`       | Propulsar            |
+| `Espacio` | Disparar             |
+| `1`–`5`   | Cambiar skin de nave |
 
 ## Puntuación
 
@@ -55,3 +56,20 @@ Luego visita `http://localhost:3000`.
 - El ítem flota por la pantalla y desaparece a los 12 s si no se recoge.
 - El HUD muestra el tiempo restante en cian.
 - El efecto se pierde si la nave es destruida.
+
+## Skins
+
+La apariencia de la nave se puede cambiar en cualquier momento con las teclas `1`–`5`:
+
+| Tecla | Skin        | Estilo                           |
+| ----- | ----------- | -------------------------------- |
+| `1`   | Clásica     | Silueta original en blanco       |
+| `2`   | Interceptor | Delta cian con línea de fuselaje |
+| `3`   | Halcón      | Alas barridas ámbar con cabina   |
+| `4`   | Fantasma    | Contorno discontinuo violeta     |
+| `5`   | Neón        | Doble contorno verde con halo    |
+
+- Al cambiar, aparece un aviso temporal en la parte inferior del canvas.
+- Los iconos de vidas del HUD y la llama del propulsor usan la skin activa.
+- La skin elegida se guarda en `localStorage` y se recupera al recargar.
+- La skin es solo visual: el radio de colisión y el disparo no cambian.
